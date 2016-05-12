@@ -32,7 +32,7 @@ class Creature (Agent):
             direction, distance = parameters
             # ....
 
-class Rabbit (object):
+class Rabbit (Creature):
     def __init__(self, parents):
         # re: parents - would we want creature's attributes to be affected by its lineage?  we could if we want.
         self.diet = "Vegitation"
