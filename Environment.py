@@ -31,6 +31,9 @@ class Environment(object):
                 gp = self.grid[y][x]
                 if random.random() < self.model.veg_den:
                     gp.agents.append(random_of("Vegitation")(y=y, x=x, model=self.model))
+
+                # this won't create things properly for the specified odds, if this code sticks around
+                # it will need to be fixed
                 if random.random() < self.model.creature_den:
                     if random.random() < self.model.carnivore_chance:
                         gp.agents.append(random_of("Carnivore")(y=y, x=x, model=self.model))
@@ -46,7 +49,7 @@ class Gridpoint(object):
             # pick one at random
             #possible_options = Terrain.__subclasses__()
             #self.terrain = possible_options[random.randint(0, len(possible_options) - 1)]
-            self.terrain = random_of('Terrain')
+            self.terrain = random_of('Terrain')()
             self.agents = []
 
 

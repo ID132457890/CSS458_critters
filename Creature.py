@@ -1,5 +1,3 @@
-from enum import Enum
-
 class Agent (object):
     def __init__(self, y, x, model):
         self.location = (y,x)
