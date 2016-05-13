@@ -6,7 +6,7 @@ class Action(object):
 
 class Attack(Action):
     def __init__(self, other):
-        super()
+        Action.__init__(self, other)
         pass
 
 class Defence(Action):
@@ -17,7 +17,7 @@ class Flee(Defence):
 
 class Bite(Attack):
     def __init__(self, other):
-        super()
+        Attack.__init__(self, other)
         pass
 
 class Eat(Action):

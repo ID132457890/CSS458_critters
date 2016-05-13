@@ -40,7 +40,7 @@ class Environment(object):
                     elif random.random() < self.model.omnivore_chance:
                         gp.agents.append(random_of("Omnivore")(y=y, x=x, model=self.model))
                     else:
-                        gp.agents.append(random_of("Herbavore")(y=y, x=x, model=self.model))
+                        gp.agents.append(random_of("Herbivore")(y=y, x=x, model=self.model))
                 self.agents.extend(gp.agents)
 
 class Gridpoint(object):
@@ -52,6 +52,9 @@ class Gridpoint(object):
             self.terrain = random_of('Terrain')()
             self.agents = []
 
+def random_of(type):
+    options = (eval(type + '.__subclasses__()'))
+    return options[random.randint(0, len(options) - 1)]
 
 class EnvironmentTests(unittest.TestCase):
     def tests(self):
@@ -62,10 +65,6 @@ class EnvironmentTests(unittest.TestCase):
         print (e.grid_size)
         print (e.grid)
         print (e.agents)
-
-def random_of(type):
-    options = (eval(type + '.__subclasses__()'))
-    return options[random.randint(0, len(options) - 1)]
 
 if __name__ == "__main__":
     tests = EnvironmentTests()

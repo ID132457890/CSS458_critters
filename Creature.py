@@ -27,7 +27,7 @@ class Creature (Agent):
     def do_action(self, response):
         pass
 
-class Herbavore (Creature):
+class Herbivore (Creature):
     def __init__(self, y, x, model):
         Creature.__init__(self, y, x, model)
 
@@ -39,10 +39,10 @@ class Omnivore(Creature):
     def __init__(self, y, x, model):
         Creature.__init__(self, y, x, model)
 
-class Rabbit (Herbavore):
+class Rabbit (Herbivore):
     def __init__(self, y, x, model, parents = None):
         # re: parents - would we want creature's attributes to be affected by its lineage?  we could if we want.
-        Herbavore.__init__(self, y, x, model)
+        Herbivore.__init__(self, y, x, model)
         self.sense_distance = 2
 
     def take_turn(self, delta_t, step, steps_day):
