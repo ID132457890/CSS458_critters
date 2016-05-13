@@ -1,4 +1,5 @@
-from Creature import *
+import Creature
+
 import unittest
 # Basic stubs of how the action classes might possibly work
 
@@ -29,6 +30,18 @@ class Eat(Action):
     def __init__(self, agent, other):
         if not can_eat(agent, other):
             raise Exception ("Invalid consumption! %s cannot consume %s" % (agent, other))
+        else:
+            self.agent = agent
+            self.other = other
+
+    def do_action(self):
+        amount = self.agent.eat_per_day * self.agent.model.delta_t
+        amount = min(amount, self.other.food_value)
+        self.agent.energy += amount
+        self.other.food_value -= amount
+        print ("%r ate %r for %f" % (self.agent, self.other, amount))
+        return True
+
 
 class NoAction(Action):
     pass
@@ -50,7 +63,7 @@ class Move(Action):
         self.agent = agent
 
     def do_action(self):
-        # print ("%s moving to %d, %d from %d, %d" % (self.agent, self.move_y,self.move_x, self.agent.location[0], self.agent.location[1]))
+        #print ("%s moving to %d, %d from %d, %d" % (self.agent, self.move_y,self.move_x, self.agent.location[0], self.agent.location[1]))
         model = self.agent.model
         old_location = model.env.grid[self.agent.location[0]][self.agent.location[1]]
         new_location = model.env.grid[self.move_y][self.move_x]
@@ -60,17 +73,17 @@ class Move(Action):
         return True
 
 def can_eat(eater, eaten):
-    if isinstance(eater, Herbivore):
-        if isinstance(eaten, Vegitation):
+    if isinstance(eater, Creature.Herbivore):
+        if isinstance(eaten, Creature.Vegitation):
             return True
         else:
             return False
-    elif isinstance(eater, Carnivore):
-        if isinstance(eaten, Vegitation):
+    elif isinstance(eater, Creature.Carnivore):
+        if isinstance(eaten, Creature.Vegitation):
             return False
         else:
             return True
-    elif isinstance(eater, Omnivore):
+    elif isinstance(eater, Creature.Omnivore):
         return True
     else:
         return False

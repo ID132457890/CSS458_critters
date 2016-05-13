@@ -5,6 +5,8 @@ class Agent (object):
     def __init__(self, y, x, model):
         self.location = (y,x)
         self.model = model
+        self.PREDATOR = ("Carnivore", "Omnivore")
+        self.PLANTS = ("Vegitation")
 
     def take_turn(self, delta_t, step, steps_day):
         # No actions defined for the agent type if this is reached
@@ -20,13 +22,15 @@ class Creature (Agent):
         self.air_movement = False
         self.surface_movement = True
         self.variables = 'blah'
-        self.hydration = 40.0
-        self.energy = 40.0
+        self.hydration = 5.0
+        self.energy = 5.0
         self.daily_hydration_usage = 0.3
         self.daily_energy_usage = 0.3
         self.health = 1.0
         self.food_value = 1.0
         self.alive = True
+        self.hunger = 3.0
+        self.eat_per_day = 1
 
     def take_turn(self, delta_t, step, steps_day):
         return super(Creature, self).take_turn(delta_t, step, steps_day)
@@ -45,23 +49,24 @@ class Creature (Agent):
                 self.model.env.remove_agent(self)
                 print("%r rotted away" % self)
 
-    def sense_creatures(self):
-        return []
+    def sense_agents(self, search_for = (Agent,), distance = 0):
+        search_list = [self.location]
+        if distance > 0:
+            search_list.extend(neighbor_locations(self, distance))
+        result_grid_points = [self.model.env.grid[y][x] for y, x in search_list]
+        agents_found = []
+        for gp in result_grid_points:
+            for agent in gp.agents:
+                for z in search_for:
+                    if isinstance(agent, z) == True:
+                        agents_found.append(agent)
+                        break
 
-    def sense_predators(self):
-        creatures = self.sense_creatures()
-        predators = [x for x in creatures if x.diet == "Creature"]
-        return predators
+        return agents_found
 
     def possible_movements(self):
-        y = self.location[0]
-        x = self.location[1]
-        movement_choices = ((y-1,x-1), (y-1,x-1), (y+1,x-1),
-                            (y,x-1), (y,x+1),
-                            (y+1,x-1), (y+1,x), (y+1, x+1))
-
-        return [(y,x) for y, x in movement_choices if min(y,x) >= 0 and max(y,x) < self.model.env.grid_size and
-                 self.passable(self.model.env.grid[y][x].terrain) == True]
+        movement_choices = self.model.env.neighbor_locations(agent=self)
+        return [(y,x) for y, x in movement_choices if self.passable(self.model.env.grid[y][x].terrain) == True]
 
     def passable(self, terrain):
         return ((terrain.surface_passable == True and self.surface_movement == True) or
@@ -86,9 +91,11 @@ class Rabbit (Herbivore):
         self.sense_distance = 2
 
     def take_turn(self, delta_t, step, steps_day):
-        response = None
-        predators = self.sense_predators()
-
+        # eat if hungry
+        if self.energy < self.hunger:
+            food = self.sense_agents(search_for = (Vegitation,))
+            if len(food):
+                return Eat(self, food[0])
         # Just hop randomly for the fun of it for testing purposes
         moves = self.possible_movements()
         move_y, move_x = moves[random.randint(0, len(moves)-1)]

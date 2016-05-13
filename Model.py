@@ -1,4 +1,5 @@
 from Environment import *
+from Creature import *
 import unittest
 
 # basic stubs for how the model could be ran

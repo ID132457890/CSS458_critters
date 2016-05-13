@@ -52,6 +52,34 @@ class Environment(object):
         self.agents.remove(agent)
         self.grid[agent.location[0]][agent.location[1]].agents.remove(agent)
 
+    def neighbor_locations(self, agent = None, location = None, distance = 1):
+        if agent is not None:
+            location = agent.location
+
+        if location is not None:
+            if distance > 0:
+                y, x = location
+                movement_choices = ((y - 1, x - 1), (y - 1, x - 1), (y + 1, x - 1),
+                                    (y, x - 1), (y, x + 1),
+                                    (y + 1, x - 1), (y + 1, x), (y + 1, x + 1))
+                valid_choices = [(y,x) for y, x in movement_choices if min(y,x) >= 0 and max(y,x) < self.grid_size]
+                if distance > 1:
+                    valid_choices.extend([self.neighbor_locations(location = x, distance = distance - 1) for x in
+                                          valid_choices])
+
+                # remove duplicates
+                valid_choices = list(set(valid_choices))
+                # remove self
+                try:
+                    valid_choices.remove((y,x))
+                except:
+                    pass
+                return valid_choices
+            else:
+                return None
+        else:
+            raise Exception("Neighbor_locations requires either agent or location to be specified.")
+
 class Gridpoint(object):
     def __init__(self, terrain_type = None):
         if terrain_type == None:
