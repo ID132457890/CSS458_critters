@@ -10,7 +10,7 @@ class Model(object):
         self.creature_den     = conf['creature_density']   if 'creature_density' in conf   else .2
         self.carnivore_chance = conf['carnivore_chance']   if 'carnivore_chance' in conf   else .2
         self.omnivore_chance  = conf['omnivore_chance']    if 'omnivore_chance' in conf    else .2
-        self.sim_length       = conf['sim_length']         if 'sim_length' in conf         else 1
+        self.sim_length       = conf['sim_length']         if 'sim_length' in conf         else 600
         self.steps_day        = conf['steps_day']          if 'steps_day' in conf          else 1
 
         self.delta_t = 1 / float(self.steps_day)
@@ -24,7 +24,12 @@ class Model(object):
                 # at different times of day (if sim_length were days, and delta_t was 1/24,
                 # then (x % steps_day) between 20 and 06 could be times that day-dwellers sleep, for example
                 # Can be ignored if we'd rather not deal with it.
-                agent.take_turn(self.delta_t, x, self.steps_day)
+                for actions in range(agent.movement_speed):
+                    if agent.take_turn(self.delta_t, x, self.steps_day).do_action() == False:
+                        raise Exception('Action error occured!')
+            if x != 0 and x % self.steps_day == 0:
+                for agent in self.env.agents:
+                    agent.daily_agent_maintenance()
 
         # Report any interesting statistiscs, etc
 

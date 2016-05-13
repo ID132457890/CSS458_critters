@@ -1,8 +1,13 @@
+from Creature import *
+import unittest
 # Basic stubs of how the action classes might possibly work
 
 class Action(object):
     def __init__(self):
         pass
+
+    def do_action(self):
+        return True
 
 class Attack(Action):
     def __init__(self, other):
@@ -16,12 +21,73 @@ class Flee(Defence):
     pass
 
 class Bite(Attack):
-    def __init__(self, other):
-        Attack.__init__(self, other)
+    def __init__(self, agent, other):
+        Attack.__init__(self, agent, other)
         pass
 
 class Eat(Action):
+    def __init__(self, agent, other):
+        if not can_eat(agent, other):
+            raise Exception ("Invalid consumption! %s cannot consume %s" % (agent, other))
+
+class NoAction(Action):
     pass
 
+class Grow(Action):
+    def __init__(self, agent, amount):
+        self.agent = agent
+        self.amount = amount
+
+    def do_action(self):
+        rate = self.agent.growth_rate
+        self.agent.food_value += self.amount
+        return True
+
 class Move(Action):
-    pass
+    def __init__(self, agent, y, x):
+        self.move_y = y
+        self.move_x = x
+        self.agent = agent
+
+    def do_action(self):
+        # print ("%s moving to %d, %d from %d, %d" % (self.agent, self.move_y,self.move_x, self.agent.location[0], self.agent.location[1]))
+        model = self.agent.model
+        old_location = model.env.grid[self.agent.location[0]][self.agent.location[1]]
+        new_location = model.env.grid[self.move_y][self.move_x]
+        old_location.agents.remove(self.agent)
+        new_location.agents.append(self.agent)
+        self.agent.location = (self.move_y, self.move_x)
+        return True
+
+def can_eat(eater, eaten):
+    if isinstance(eater, Herbivore):
+        if isinstance(eaten, Vegitation):
+            return True
+        else:
+            return False
+    elif isinstance(eater, Carnivore):
+        if isinstance(eaten, Vegitation):
+            return False
+        else:
+            return True
+    elif isinstance(eater, Omnivore):
+        return True
+    else:
+        return False
+
+class ModelTests(unittest.TestCase):
+    def tests(self):
+        a = []
+        a.append(Wolf(x = 0, y = 0, model = None))
+        a.append(Hog(x = 0, y = 0, model = None))
+        a.append(Rabbit(x = 0, y = 0, model = None))
+        a.append(EdiblePlant(x = 0, y = 0, model = None))
+
+        for i in a:
+            for j in a:
+                print ("%r can eat %r: %r" % (i, j, can_eat(i,j)))
+
+
+if __name__ == "__main__":
+    tests = ModelTests()
+    tests.tests()

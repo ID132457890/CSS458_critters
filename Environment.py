@@ -43,6 +43,15 @@ class Environment(object):
                         gp.agents.append(random_of("Herbivore")(y=y, x=x, model=self.model))
                 self.agents.extend(gp.agents)
 
+    def remove_agent(self, agent):
+        """
+        Called when an agent has been consumed or otherwise should no longer be in the simulation
+        :param agent: agent to be removed
+        :return: nothing
+        """
+        self.agents.remove(agent)
+        self.grid[agent.location[0]][agent.location[1]].agents.remove(agent)
+
 class Gridpoint(object):
     def __init__(self, terrain_type = None):
         if terrain_type == None:
@@ -62,9 +71,9 @@ class EnvironmentTests(unittest.TestCase):
         # m = Model()
         e = Environment(Model())
         self.assertEquals(e.grid_size, 100)
-        print (e.grid_size)
-        print (e.grid)
-        print (e.agents)
+        #print (e.grid_size)
+        #print (e.grid)
+        #print (e.agents)
 
 if __name__ == "__main__":
     tests = EnvironmentTests()
