@@ -6,13 +6,13 @@ class Terrain(object):
 
 class Grasslands(Terrain):
     def __init__(self):
-        super()
+        Terrain.__init__(self)
         self.surface_passable = True
         self.air_passable = True
 
 class Wetlands (Terrain):
     def __init__(self):
-        super()
+        Terrain.__init__(self)
         self.surface_passable = True
         self.air_passable = True
         self.water_available = True

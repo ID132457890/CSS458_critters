@@ -8,10 +8,10 @@ class Model(object):
     def __init__(self, conf = {}):
         self.grid_size        = conf['grid_size']          if 'grid_size' in conf          else 100
         self.veg_den          = conf['vegitation_density'] if 'vegitation_density' in conf else .3
-        self.creature_den     = conf['creature_density']   if 'creature_density' in conf   else .2
-        self.carnivore_chance = conf['carnivore_chance']   if 'carnivore_chance' in conf   else .2
-        self.omnivore_chance  = conf['omnivore_chance']    if 'omnivore_chance' in conf    else .2
-        self.sim_length       = conf['sim_length']         if 'sim_length' in conf         else 600
+        self.creature_den     = conf['creature_density']   if 'creature_density' in conf   else .08
+        self.carnivore_chance = conf['carnivore_chance']   if 'carnivore_chance' in conf   else .01
+        self.omnivore_chance  = conf['omnivore_chance']    if 'omnivore_chance' in conf    else .01
+        self.sim_length       = conf['sim_length']         if 'sim_length' in conf         else 500
         self.steps_day        = conf['steps_day']          if 'steps_day' in conf          else 1
 
         self.delta_t = 1 / float(self.steps_day)
@@ -38,7 +38,7 @@ class Model(object):
 
 class ModelTests(unittest.TestCase):
     def tests(self):
-        m = Model({'grid_size': 100})
+        m = Model({'grid_size': 30})
         m.run_simulation()
 
 if __name__ == "__main__":

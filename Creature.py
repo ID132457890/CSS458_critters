@@ -30,7 +30,9 @@ class Creature (Agent):
         self.food_value = 1.0
         self.alive = True
         self.hunger = 3.0
-        self.eat_per_day = 1
+        self.thirst = 3.0
+        self.eat_per_day = 4
+        self.drink_per_day = 4
 
     def take_turn(self, delta_t, step, steps_day):
         return super(Creature, self).take_turn(delta_t, step, steps_day)
@@ -40,7 +42,7 @@ class Creature (Agent):
             self.energy -= self.daily_energy_usage
             self.hydration -= self.daily_hydration_usage
             if min(self.energy, self.hydration) <= 0:
-                print ("%r died" % self)
+                print ("%r died e %f h %f" % (self, self.energy, self.hydration))
                 self.alive = False
                 self.movement_speed = 0
         else:
@@ -52,7 +54,7 @@ class Creature (Agent):
     def sense_agents(self, search_for = (Agent,), distance = 0):
         search_list = [self.location]
         if distance > 0:
-            search_list.extend(neighbor_locations(self, distance))
+            search_list.extend(self.model.env.neighbor_locations(self, distance))
         result_grid_points = [self.model.env.grid[y][x] for y, x in search_list]
         agents_found = []
         for gp in result_grid_points:
@@ -72,17 +74,36 @@ class Creature (Agent):
         return ((terrain.surface_passable == True and self.surface_movement == True) or
                (terrain.air_passable == True and self.air_movement == True))
 
+    def consume(self, search_for):
+        if self.energy < self.hunger:
+            food = self.sense_agents(search_for = search_for)
+            if len(food):
+                return Eat(self, food[0])
+        if self.hydration < self.thirst:
+            if self.model.env.water_available(self):
+                return Drink(self)
+        return None
+
 class Herbivore (Creature):
     def __init__(self, y, x, model):
         Creature.__init__(self, y, x, model)
+
+    def consume(self):
+        return super(Herbivore, self).consume(search_for = (Vegitation,))
 
 class Carnivore (Creature):
     def __init__(self, y, x, model):
         Creature.__init__(self, y, x, model)
 
+    def consume(self):
+        return super(Carnivore, self).consume(search_for=(Creature,))
+
 class Omnivore(Creature):
     def __init__(self, y, x, model):
         Creature.__init__(self, y, x, model)
+
+    def consume(self):
+        return super(Omnivore, self).consume(search_for=(Vegitation,Creature))
 
 class Rabbit (Herbivore):
     def __init__(self, y, x, model, parents = None):
@@ -91,15 +112,15 @@ class Rabbit (Herbivore):
         self.sense_distance = 2
 
     def take_turn(self, delta_t, step, steps_day):
-        # eat if hungry
-        if self.energy < self.hunger:
-            food = self.sense_agents(search_for = (Vegitation,))
-            if len(food):
-                return Eat(self, food[0])
-        # Just hop randomly for the fun of it for testing purposes
-        moves = self.possible_movements()
-        move_y, move_x = moves[random.randint(0, len(moves)-1)]
-        return Move(self, y = move_y, x = move_x)
+        # eat/drink if needed
+        move = self.consume()
+        if move is None:
+            # Just hop randomly for the fun of it for testing purposes
+            moves = self.possible_movements()
+            move_y, move_x = moves[random.randint(0, len(moves) - 1)]
+            return Move(self, y=move_y, x=move_x)
+        else:
+            return move
 
 class Wolf (Carnivore):
     pass
@@ -112,7 +133,7 @@ class Vegitation(Agent):
         Agent.__init__(self, y, x, model)
         self.food_value = 0.0
         self.movement_speed = 1
-        self.growth_rate = 1
+        self.growth_rate = 5.5
 
     def take_turn(self, delta_t, step, steps_day):
         super(Vegitation, self).take_turn(delta_t, step, steps_day)

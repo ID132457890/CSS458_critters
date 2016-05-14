@@ -49,8 +49,13 @@ class Environment(object):
         :param agent: agent to be removed
         :return: nothing
         """
+        y, x = agent.location
         self.agents.remove(agent)
-        self.grid[agent.location[0]][agent.location[1]].agents.remove(agent)
+        self.grid[y][x].agents.remove(agent)
+
+    def water_available(self, agent):
+        y, x = agent.location
+        return self.grid[y][x].terrain.water_available
 
     def neighbor_locations(self, agent = None, location = None, distance = 1):
         if agent is not None:
@@ -93,16 +98,17 @@ def random_of(type):
     options = (eval(type + '.__subclasses__()'))
     return options[random.randint(0, len(options) - 1)]
 
-class EnvironmentTests(unittest.TestCase):
-    def tests(self):
-        print (Creature.__subclasses__())
+#class EnvironmentTests(unittest.TestCase):
+#    def tests(self):
+#        pass
+        #print (Creature.__subclasses__())
         # m = Model()
-        e = Environment(Model())
-        self.assertEquals(e.grid_size, 100)
+        #e = Environment(Model())
+        #self.assertEquals(e.grid_size, 100)
         #print (e.grid_size)
         #print (e.grid)
         #print (e.agents)
 
-if __name__ == "__main__":
-    tests = EnvironmentTests()
-    tests.tests()
+#if __name__ == "__main__":
+#    tests = EnvironmentTests()
+#    tests.tests()

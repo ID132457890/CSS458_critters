@@ -39,9 +39,18 @@ class Eat(Action):
         amount = min(amount, self.other.food_value)
         self.agent.energy += amount
         self.other.food_value -= amount
-        print ("%r ate %r for %f" % (self.agent, self.other, amount))
+        #print ("%r ate %r for %f e %f o %f" % (self.agent, self.other, amount, self.agent.energy, self.other.food_value))
         return True
 
+class Drink(Action):
+    def __init__(self, agent):
+        self.agent = agent
+
+    def do_action(self):
+        if self.agent.model.env.water_available(self.agent):
+            self.agent.hydration += self.agent.drink_per_day * self.agent.model.delta_t
+            #print ("%r drank, h: %f" % (self.agent, self.agent.hydration))
+            return True
 
 class NoAction(Action):
     pass
@@ -52,7 +61,6 @@ class Grow(Action):
         self.amount = amount
 
     def do_action(self):
-        rate = self.agent.growth_rate
         self.agent.food_value += self.amount
         return True
 
