@@ -1,4 +1,5 @@
-import Creature
+import Creature as C
+import random
 
 import unittest
 # Basic stubs of how the action classes might possibly work
@@ -10,21 +11,65 @@ class Action(object):
     def do_action(self):
         return True
 
-class Attack(Action):
-    def __init__(self, other):
-        Action.__init__(self, other)
+class CombatAction(Action):
+    pass
+
+class AttackAction(CombatAction):
+    pass
+
+class Bite(AttackAction):
+    def __init__(self, agent, other):
+        Attack.__init__(self, agent, other)
         pass
 
-class Defence(Action):
+class Defence(CombatAction):
     pass
 
 class Flee(Defence):
     pass
 
-class Bite(Attack):
-    def __init__(self, agent, other):
-        Attack.__init__(self, agent, other)
-        pass
+class Attack(Action):
+    """
+    Class that defines the rules of combat and carries out allowing each creature to choose their attack or
+    defense strategies.
+    """
+
+    def __init__(self, attacker, attacked):
+        Action.__init__(self)
+        self.attacker = attacker
+        self.attacked = attacked
+
+    def combat(self):
+        resolved = False
+        while not resolved:
+            attack = self.attacker.combat_attack(self)
+            defense = self.attacked.combat_defense(self)
+            initiative_roll = None
+            while initiative_roll is None:
+                defense_roll = random.randint(1, Creature.max_speed)
+                attack_roll = random.randint(1, Creature.max_speed)
+                if attack_roll > defense_roll and self.attacker.speed >= attack_roll:
+                    # successful attack
+                    initiative_roll = attack
+                elif self.attacked.speed >= defense_roll:
+                    # successful defense
+                    initiative_roll = defense
+                else:
+                    pass    # both failed, roll again
+            initiative_roll().do_action()
+            if initiative_roll().complete():
+                resolved = True
+            else:
+                if initiative_roll == attack:
+                    defense.do_action()
+                    if defense().complete():
+                        resolved = True
+                else:
+                    attack.do_action()
+                    if attack().complete():
+                        resolved = True
+        self.attacker.combat_cleanup()      # allow attacker to eat the spoils, etc
+        self.attacked.combat_cleanup()      # just in case there's something that should be done after combat
 
 class Eat(Action):
     def __init__(self, agent, other):
@@ -39,7 +84,9 @@ class Eat(Action):
         amount = min(amount, self.other.food_value)
         self.agent.energy += amount
         self.other.food_value -= amount
-        #print ("%r ate %r for %f e %f o %f" % (self.agent, self.other, amount, self.agent.energy, self.other.food_value))
+        self.agent.model.logger.log(0,"%r ate %r for %f, eater energy now:%f ate energy now %f." %
+                    (self.agent, self.other, amount, self.agent.energy, self.other.food_value))
+        self.other.be_eaten(self.agent)
         return True
 
 class Drink(Action):
@@ -81,17 +128,17 @@ class Move(Action):
         return True
 
 def can_eat(eater, eaten):
-    if isinstance(eater, Creature.Herbivore):
-        if isinstance(eaten, Creature.Vegitation):
+    if isinstance(eater, C.Herbivore):
+        if isinstance(eaten, C.Vegitation):
             return True
         else:
             return False
-    elif isinstance(eater, Creature.Carnivore):
-        if isinstance(eaten, Creature.Vegitation):
+    elif isinstance(eater, C.Carnivore):
+        if isinstance(eaten, C.Vegitation):
             return False
         else:
             return True
-    elif isinstance(eater, Creature.Omnivore):
+    elif isinstance(eater, C.Omnivore):
         return True
     else:
         return False
@@ -99,10 +146,10 @@ def can_eat(eater, eaten):
 class ModelTests(unittest.TestCase):
     def tests(self):
         a = []
-        a.append(Wolf(x = 0, y = 0, model = None))
-        a.append(Hog(x = 0, y = 0, model = None))
-        a.append(Rabbit(x = 0, y = 0, model = None))
-        a.append(EdiblePlant(x = 0, y = 0, model = None))
+        a.append(C.Wolf(x = 0, y = 0, model = None))
+        a.append(C.Hog(x = 0, y = 0, model = None))
+        a.append(C.Rabbit(x = 0, y = 0, model = None))
+        a.append(C.EdiblePlant(x = 0, y = 0, model = None))
 
         for i in a:
             for j in a:

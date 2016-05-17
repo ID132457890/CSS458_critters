@@ -15,10 +15,18 @@ class Agent (object):
     def daily_agent_maintenance(self):
         pass
 
+    def be_eaten(self, other):
+        pass
+
 class Creature (Agent):
+    max_speed = 10          # Used for combat roll ranges, needs to be equal or more than
+                            # the max self.strength of all creatures
+
     def __init__(self, y, x, model):
         Agent.__init__(self, y, x, model)
-        self.movement_speed = 2
+        self.movement_speed = 2    #moves per turn
+        self.strength = 1   #combat strength
+        self.speed = 2  #combat speed
         self.air_movement = False
         self.surface_movement = True
         self.variables = 'blah'
@@ -84,6 +92,15 @@ class Creature (Agent):
                 return Drink(self)
         return None
 
+    def combat_attack(self, combat):
+        pass
+
+    def combat_defense(self, combat):
+        return Flee()
+
+    def combat_cleanup(self):
+        pass
+
 class Herbivore (Creature):
     def __init__(self, y, x, model):
         Creature.__init__(self, y, x, model)
@@ -94,6 +111,7 @@ class Herbivore (Creature):
 class Carnivore (Creature):
     def __init__(self, y, x, model):
         Creature.__init__(self, y, x, model)
+        self.carrion_eater = True
 
     def consume(self):
         return super(Carnivore, self).consume(search_for=(Creature,))
@@ -142,3 +160,11 @@ class Vegitation(Agent):
 class EdiblePlant(Vegitation):
     def __init__(self, y, x, model):
         Vegitation.__init__(self, y, x, model)
+
+class PoisionousPlant (Vegitation):
+    def __init__(self, y, x, model):
+        Vegitation.__init__(self, y, x, model)
+
+    def be_eaten(self, other):
+        self.model.logger.log(0, "%s poisioned %s!" % (self, other))
+        other.alive = False
