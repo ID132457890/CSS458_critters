@@ -42,14 +42,14 @@ class Creature (Agent):
             self.energy -= self.daily_energy_usage
             self.hydration -= self.daily_hydration_usage
             if min(self.energy, self.hydration) <= 0:
-                print ("%r died e %f h %f" % (self, self.energy, self.hydration))
+                self.model.logger.log(0, "%r died e %f h %f" % (self, self.energy, self.hydration))
                 self.alive = False
                 self.movement_speed = 0
         else:
             self.food_value -= .5
             if self.food_value <= 0:
                 self.model.env.remove_agent(self)
-                print("%r rotted away" % self)
+                self.model.logger.log(0, "%r rotted away" % self)
 
     def sense_agents(self, search_for = (Agent,), distance = 0):
         search_list = [self.location]

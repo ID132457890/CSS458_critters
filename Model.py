@@ -30,14 +30,17 @@ class Model(object):
                 # then (x % steps_day) between 20 and 06 could be times that day-dwellers sleep, for example
                 # Can be ignored if we'd rather not deal with it.
                 for actions in range(agent.movement_speed):
-                    if agent.take_turn(self.delta_t, x, self.steps_day).do_action() == False:
-                        raise Exception('Action error occured!')
+                    action = agent.take_turn(self.delta_t, x, self.steps_day).do_action()
+                    if action == False:
+                        self.logger.log(10, 'Action error occurred! agent: %r action: %r' % (agent, action))
+                    self.analytics.turn_analyze()
             if x != 0 and x % self.steps_day == 0:
                 for agent in self.env.agents:
                     agent.daily_agent_maintenance()
+            self.analytics.round_analyze()
 
         # Report any interesting statistiscs, etc
-
+        self.analytics.finish_analyze()
 
 
 class ModelTests(unittest.TestCase):

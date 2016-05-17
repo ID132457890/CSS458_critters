@@ -1,15 +1,19 @@
 class Logger(object):
     def __init__(self, model, log_type="Console", options = {}):
         self.model = model
-        self._logger = exec("__Logger" + log_type)(self.options)
+        self._loggers = [eval("Logger" + log_type)(options)]
 
-    def log(self, loglevel, message):
-        self._logger(loglevel, message)
+    def add_logger(self, log_type, options):
+        self._loggers.append(eval("Logger" + log_type)(options))
 
-class __LoggerConsole(object):
+    def log(self, log_level, message):
+        for logger in self._loggers:
+            logger.log(log_level, message)
+
+class LoggerConsole(object):
     def __init__(self, options = {}):
         self.threshold = options['threshold'] if 'threshold' in options else 0
 
-    def log(self, loglevel, message):
-        if self.threshold <= loglevel:
-            print ("(%d): %s" % (loglevel, message))
+    def log(self, log_level, message):
+        if self.threshold <= log_level:
+            print ("(%d): %s" % (log_level, message))
