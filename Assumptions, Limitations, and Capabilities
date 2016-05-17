@@ -1,0 +1,14 @@
+File to track what we do and do not wan our model to do, as well as document the assumptions that we are
+making in our model:
+
+Assumptions:
+    * Assumptions of our model
+
+Capabilities:
+    * Things our model can do
+
+Limitations:
+    * Limitations of our model
+
+Analytics to produce:
+    * Data we would like to produce with our model

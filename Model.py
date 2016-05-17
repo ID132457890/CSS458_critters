@@ -1,5 +1,7 @@
 from Environment import *
 from Creature import *
+import AnalyticsReporting as AR
+import Logger as L
 import unittest
 
 # basic stubs for how the model could be ran
@@ -15,6 +17,8 @@ class Model(object):
         self.steps_day        = conf['steps_day']          if 'steps_day' in conf          else 1
 
         self.delta_t = 1 / float(self.steps_day)
+        self.analytics = AR.AnalyticsReporting(self)
+        self.logger = L.Logger(self)
 
     def run_simulation(self):
         self.env = Environment(self)
